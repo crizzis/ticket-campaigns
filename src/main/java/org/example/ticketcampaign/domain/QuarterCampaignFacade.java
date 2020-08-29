@@ -2,10 +2,12 @@ package org.example.ticketcampaign.domain;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -30,5 +32,25 @@ public class QuarterCampaignFacade {
         quarterCampaignRepository.findByReferenceDate(referenceDate)
                 .orElseThrow(() -> new QuarterCampaignException("Could not find campaign by reference date: " + referenceDate))
                 .adjustBy(adjustment);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<List<Integer>> findById(Long id) {
+        return asWeeklyTicketCounts(quarterCampaignRepository.findById(id));
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<List<Integer>> findByReferenceDate(LocalDate referenceDate) {
+        return asWeeklyTicketCounts(quarterCampaignRepository.findByReferenceDate(referenceDate));
+    }
+
+    public void deleteById(Long id) {
+        quarterCampaignRepository.deleteById(id);
+    }
+
+    private Optional<List<Integer>> asWeeklyTicketCounts(Optional<QuarterCampaign> campaign) {
+        return campaign
+                .map(QuarterCampaign::getWeeklyTickets)
+                .map(List::copyOf);
     }
 }

@@ -134,4 +134,42 @@ class QuarterCampaignFacadeTest extends Specification {
         26          | -10        || [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2]
         26          | -35        || [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     }
+
+    def "findById should return weekly tickets when campaign exists"() {
+        given:
+        repository.findById(3L) >> Optional.of(QuarterCampaign.forDateAndTicketPool(MID_FIRST_QUARTER, 13))
+
+        expect:
+        facade.findById(3L).get() == [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    }
+
+    def "findById should return empty result when campaign not exists"() {
+        given:
+        repository.findById(5L) >> Optional.empty()
+
+        expect:
+        facade.findById(5L).empty
+    }
+
+    def "findByReferenceDate should return weekly tickets when campaign exists"() {
+        given:
+        repository.findByReferenceDate(MID_FOURTH_QUARTER) >> Optional.of(QuarterCampaign.forDateAndTicketPool(MID_FOURTH_QUARTER, 26))
+
+        expect:
+        facade.findByReferenceDate(MID_FOURTH_QUARTER).get() == [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+    }
+
+    def "findByReferenceDate should return empty result when campaign not exists"() {
+        expect:
+        facade.findByReferenceDate(MID_FIRST_QUARTER).empty
+    }
+
+    def "deleteById should delegate the call to repository"() {
+        when:
+        facade.deleteById(3L)
+
+        then:
+        1 * repository.deleteById(3L)
+    }
+
 }
