@@ -1,0 +1,16 @@
+version: "3.5"
+services:
+  db:
+    container_name: ticket-campaigns-db
+    image: "postgres:11.4-alpine"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      PGDATA: /data/postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - db-data:/data/postgres
+
+volumes:
+  db-data:
