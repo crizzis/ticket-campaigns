@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -20,5 +21,14 @@ public class QuarterCampaignFacade {
         return quarterCampaignRepository
                 .saveAndFlush(QuarterCampaign.forDateAndTicketPool(referenceDate, totalTickets))
                 .getId();
+    }
+
+    public void adjust(LocalDate referenceDate, int adjustment) {
+        if (Objects.isNull(referenceDate)) {
+            throw new QuarterCampaignException("Missing reference date");
+        }
+        quarterCampaignRepository.findByReferenceDate(referenceDate)
+                .orElseThrow(() -> new QuarterCampaignException("Could not find campaign by reference date: " + referenceDate))
+                .adjustBy(adjustment);
     }
 }

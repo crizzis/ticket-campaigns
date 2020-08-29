@@ -60,9 +60,14 @@ class QuarterCampaign {
     private static List<Integer> adjustBy(List<Integer> weeklyTickets, int ticketPool) {
         var result = new ArrayList<Integer>();
         int quotient = ticketPool / weeklyTickets.size();
-        int remainder = ticketPool % weeklyTickets.size();
+        int remainder = Math.abs(ticketPool % weeklyTickets.size());
+        boolean reduction = (ticketPool < 0);
         for (int i = 0; i < weeklyTickets.size(); ++i) {
-            result.add(weeklyTickets.get(i) + quotient + (i < remainder ? 1 : 0));
+            int adjustedValue = weeklyTickets.get(i) + quotient;
+            if (i < remainder) {
+                adjustedValue += (reduction ? -1 : 1);
+            }
+            result.add(Math.max(0, adjustedValue));
         }
         return result;
     }

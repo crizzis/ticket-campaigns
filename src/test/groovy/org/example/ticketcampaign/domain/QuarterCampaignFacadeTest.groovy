@@ -35,6 +35,7 @@ class QuarterCampaignFacadeTest extends Specification {
             createdCampaign = campaign
         }
         repository.existsByReferenceDate(MID_FIRST_QUARTER) >> false
+        repository.findByReferenceDate(MID_FIRST_QUARTER) >> Optional.empty()
         repository.existsByReferenceDate(MID_FOURTH_QUARTER) >> true
     }
 
@@ -92,5 +93,45 @@ class QuarterCampaignFacadeTest extends Specification {
         26           || [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
         10           || [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0]
         35           || [3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2]
+    }
+
+    def "adjust should report error when #description"() {
+        when:
+        facade.adjust(MID_FIRST_QUARTER, 10)
+
+        then:
+        thrown QuarterCampaignException
+
+        where:
+        referenceDate     | adjustment || description
+        null              | 10         || 'missing campaign'
+        MID_FIRST_QUARTER | 10         || 'campaign not exists'
+    }
+
+    def "adjust should increase or decrease initial ticket number #initialPool evenly giving #expected when adjustment by #adjustment"() {
+        given:
+        def campaign = QuarterCampaign.forDateAndTicketPool(MID_FOURTH_QUARTER, initialPool)
+        repository.findByReferenceDate(MID_FOURTH_QUARTER) >> Optional.of(campaign)
+
+        when:
+        facade.adjust(MID_FOURTH_QUARTER, adjustment)
+
+        then:
+        expected.eachWithIndex { expectedPerWeek, i ->
+            assert campaign.getTicketsAvailableInWeek(i) == expectedPerWeek
+        }
+
+        where:
+        initialPool | adjustment || expected
+        0           | 0          || [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        26          | 0          || [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+        0           | 26         || [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+        0           | -26        || [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        26          | 10         || [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2]
+        13          | 35         || [4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3]
+        26          | -26        || [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        26          | -13        || [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        26          | -10        || [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2]
+        26          | -35        || [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     }
 }
