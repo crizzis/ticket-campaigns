@@ -18,7 +18,7 @@ class QuarterCalculator {
             quarterIndex += 1;
         }
         if (quarterIndex >= QUARTERS_PER_YEAR) {
-            quarterIndex %= QUARTERS_PER_YEAR;
+            quarterIndex -= QUARTERS_PER_YEAR;
             year += 1;
         }
         return buildIntervalForQuarter(quarterIndex, year);

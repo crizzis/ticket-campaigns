@@ -7,3 +7,6 @@ spring:
     url: jdbc:postgresql://localhost:5432/ticketcampaigns
     username: user
     password: password
+  mvc:
+    format:
+      date: iso

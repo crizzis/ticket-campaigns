@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
 import java.util.Optional;
 
-interface QuarterCampaignRepository extends JpaRepository<QuarterCampaign, Long> {
+public interface QuarterCampaignRepository extends JpaRepository<QuarterCampaign, Long> {
 
     @Query("SELECT q " +
             "FROM QuarterCampaign q " +

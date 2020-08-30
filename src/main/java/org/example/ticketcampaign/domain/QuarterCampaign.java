@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static java.util.Objects.isNull;
+import static javax.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PACKAGE;
 import static lombok.AccessLevel.PRIVATE;
 
@@ -22,7 +23,7 @@ class QuarterCampaign {
     private static final int WEEKS_PER_QUARTER = 13;
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = IDENTITY)
     @Setter(PACKAGE)
     private Long id;
 
@@ -30,7 +31,7 @@ class QuarterCampaign {
     private DateInterval timeframe;
 
     @ElementCollection
-    @OrderColumn
+    @OrderColumn(name = "week_index")
     private List<Integer> weeklyTickets;
 
     static QuarterCampaign forDateAndTicketPool(LocalDate referenceDate, int ticketPool) {
