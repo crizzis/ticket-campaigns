@@ -9,6 +9,7 @@ import org.example.ticketcampaign.endpoints.dto.QuarterCampaignCreationDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static java.util.Objects.nonNull;
 import static org.springframework.http.HttpStatus.*;
 
 @RestController
@@ -25,11 +27,12 @@ import static org.springframework.http.HttpStatus.*;
 public class QuarterCampaignController {
 
     private final QuarterCampaignFacade facade;
+    private final Clock clock;
 
     @PostMapping
     @ResponseStatus(CREATED)
     long create(@RequestBody QuarterCampaignCreationDto campaign) {
-        return facade.create(campaign.getReferenceDate(), campaign.getTicketPool());
+        return facade.create(resolveReferenceDate(campaign), campaign.getTicketPool());
     }
 
     @GetMapping
@@ -76,5 +79,9 @@ public class QuarterCampaignController {
                 weeklyTickets::get,
                 (left, right) -> left,
                 LinkedHashMap::new);
+    }
+
+    private LocalDate resolveReferenceDate(QuarterCampaignCreationDto campaign) {
+        return nonNull(campaign.getReferenceDate()) ? campaign.getReferenceDate() : LocalDate.now(clock);
     }
 }

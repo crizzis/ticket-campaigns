@@ -1,6 +1,7 @@
 package org.example.ticketcampaign.endpoints.dto;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
@@ -8,5 +9,5 @@ import java.time.LocalDate;
 public class QuarterCampaignCreationDto {
 
     private int ticketPool;
-    private LocalDate referenceDate = LocalDate.now();
+    private LocalDate referenceDate;
 }

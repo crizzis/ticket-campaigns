@@ -2,12 +2,16 @@ package org.example.ticketcampaign.endpoints
 
 
 import org.example.ticketcampaign.domain.QuarterCampaignRepository
+import org.spockframework.spring.SpringBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.jdbc.Sql
 
+import java.time.Clock
 import java.time.LocalDate
+import java.time.ZoneId
 
 import static java.time.Month.APRIL
+import static java.time.Month.FEBRUARY
 import static java.time.Month.MAY
 import static org.springframework.http.HttpStatus.*
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
@@ -16,6 +20,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 class QuarterCampaignControllerIntegrationTest extends BaseControllerIntegrationTest {
 
     private static final LocalDate SECOND_QUARTER_DATE = LocalDate.of(2020, APRIL, 2)
+    private static final LocalDate TODAY = LocalDate.of(2020, FEBRUARY, 18)
+
+    @SpringBean
+    private Clock defaultClock = Stub() {
+        instant() >> TODAY.atStartOfDay(ZoneId.systemDefault()).toInstant()
+        getZone() >> ZoneId.systemDefault()
+    }
 
     @Autowired
     private QuarterCampaignRepository repository
@@ -31,6 +42,15 @@ class QuarterCampaignControllerIntegrationTest extends BaseControllerIntegration
         response.status == CREATED.value()
         content != null
         repository.existsById(content)
+    }
+
+    def "create should use current date if reference date not explicitly provided"() {
+        when:
+        def response = performWithJsonContent(post('/quartercampaigns'), ['ticketPool' : 26])
+
+        then:
+        response.status == CREATED.value()
+        repository.existsByReferenceDate(TODAY)
     }
 
     def "create should report error when campaign already exists"() {
