@@ -65,6 +65,18 @@ class QuarterCampaignControllerIntegrationTest extends BaseControllerIntegration
         content.message == 'Campaign already exists for referenceDate: 2020-10-03'
     }
 
+    def "create should report error when ticket pool negative"() {
+        when:
+        def response = performWithJsonContent(post('/quartercampaigns'), [
+                'ticketPool'   : -26,
+                'referenceDate': '2020-01-24'])
+        def content = fromJson(response.contentAsString)
+
+        then:
+        response.status == BAD_REQUEST.value()
+        content.message == 'ticketPool: must be greater than or equal to 0'
+    }
+
     def "findByDate should return correct weekly ticket counts when campaign exists"() {
         when:
         def response = perform(get('/quartercampaigns').param('referenceDate', '2020-11-01'))
@@ -96,6 +108,17 @@ class QuarterCampaignControllerIntegrationTest extends BaseControllerIntegration
         then:
         result.status == BAD_REQUEST.value()
         response.message == 'Could not find campaign by reference date: 2020-01-24'
+    }
+
+    def "adjust should report error when missing reference date"() {
+        when:
+        def response = performWithJsonContent(post('/quartercampaigns/adjust'), [
+                'ticketPool'   : -26])
+        def content = fromJson(response.contentAsString)
+
+        then:
+        response.status == BAD_REQUEST.value()
+        content.message == 'referenceDate: must not be null'
     }
 
     def "adjust should report success when campaign exists"() {
